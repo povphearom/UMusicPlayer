@@ -20,8 +20,6 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,67 +32,28 @@ import android.view.View;
 
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
 import com.google.android.libraries.cast.companionlibrary.widgets.IntroductoryOverlay;
 
-public abstract class ActionBarCastActivity extends AppCompatActivity {
+public abstract class AppActivity extends AppCompatActivity {
 
-    private static final String TAG = LogHelper.makeLogTag(ActionBarCastActivity.class);
+    private static final String TAG = LogHelper.makeLogTag(AppActivity.class);
 
     private static final int DELAY_MILLIS = 1000;
 
-    private VideoCastManager mCastManager;
     private MenuItem mMediaRouteMenuItem;
-    private Toolbar mToolbar;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerLayout mDrawerLayout;
+    protected boolean mToolbarInitialized;
+    protected ActionBarDrawerToggle mDrawerToggle;
+    protected Toolbar mToolbar;
 
-    private boolean mToolbarInitialized;
+    protected int mItemToOpenWhenDrawerCloses = -1;
 
-    private int mItemToOpenWhenDrawerCloses = -1;
-
-    private final VideoCastConsumerImpl mCastConsumer = new VideoCastConsumerImpl() {
-
-        @Override
-        public void onFailed(int resourceId, int statusCode) {
-            LogHelper.d(TAG, "onFailed ", resourceId, " status ", statusCode);
-        }
-
-        @Override
-        public void onConnectionSuspended(int cause) {
-            LogHelper.d(TAG, "onConnectionSuspended() was called with cause: ", cause);
-        }
-
-        @Override
-        public void onConnectivityRecovered() {
-        }
-
-        @Override
-        public void onCastAvailabilityChanged(boolean castPresent) {
-            if (castPresent) {
-                new Handler().postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (mMediaRouteMenuItem.isVisible()) {
-                            LogHelper.d(TAG, "Cast Icon is visible");
-                            showFtu();
-                        }
-                    }
-                }, DELAY_MILLIS);
-            }
-        }
-
-    };
-
-    private final DrawerLayout.DrawerListener mDrawerListener = new DrawerLayout.DrawerListener() {
+    protected final DrawerLayout.DrawerListener mDrawerListener = new DrawerLayout.DrawerListener() {
         @Override
         public void onDrawerClosed(View drawerView) {
             if (mDrawerToggle != null) mDrawerToggle.onDrawerClosed(drawerView);
             if (mItemToOpenWhenDrawerCloses >= 0) {
                 Bundle extras = ActivityOptions.makeCustomAnimation(
-                        ActionBarCastActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                        AppActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
 
                 Class activityClass = null;
                 switch (mItemToOpenWhenDrawerCloses) {
@@ -106,7 +65,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
                         break;
                 }
                 if (activityClass != null) {
-                    startActivity(new Intent(ActionBarCastActivity.this, activityClass), extras);
+                    startActivity(new Intent(AppActivity.this, activityClass), extras);
                     finish();
                 }
             }
@@ -137,15 +96,11 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
                     updateDrawerToggle();
                 }
             };
+    protected DrawerLayout mDrawerLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(TAG, "Activity onCreate");
-        VideoCastManager.checkGooglePlayServices(this);
-
-        mCastManager = VideoCastManager.getInstance();
-        mCastManager.reconnectSessionIfPossible();
     }
 
     @Override
@@ -168,8 +123,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mCastManager.addVideoCastConsumer(mCastConsumer);
-        mCastManager.incrementUiCounter();
         getFragmentManager().addOnBackStackChangedListener(mBackStackChangedListener);
     }
 
@@ -184,8 +137,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        mCastManager.removeVideoCastConsumer(mCastConsumer);
-        mCastManager.decrementUiCounter();
         getFragmentManager().removeOnBackStackChangedListener(mBackStackChangedListener);
     }
 
@@ -193,7 +144,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main, menu);
-        mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
 
@@ -235,50 +185,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     public void setTitle(int titleId) {
         super.setTitle(titleId);
         mToolbar.setTitle(titleId);
-    }
-
-    protected void initializeToolbar() {
-        if (mToolbar == null) {
-            throw new IllegalStateException("Layout is required to include a Toolbar with id " +
-                    "'toolbar'");
-        }
-        mToolbar.inflateMenu(R.menu.main);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (mDrawerLayout != null) {
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            if (navigationView == null) {
-                throw new IllegalStateException("Layout requires a NavigationView " +
-                        "with id 'nav_view'");
-            }
-
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    mToolbar, R.string.open_content_drawer, R.string.close_content_drawer);
-            mDrawerLayout.addDrawerListener(mDrawerListener);
-            populateDrawerItems(navigationView);
-            setSupportActionBar(mToolbar);
-            updateDrawerToggle();
-        } else {
-            setSupportActionBar(mToolbar);
-        }
-        mToolbarInitialized = true;
-    }
-
-    private void populateDrawerItems(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
-                        mItemToOpenWhenDrawerCloses = menuItem.getItemId();
-                        mDrawerLayout.closeDrawers();
-                        return true;
-                    }
-                });
-        if (MusicPlayerActivity.class.isAssignableFrom(getClass())) {
-            navigationView.setCheckedItem(R.id.navigation_allmusic);
-        } else if (PlaceholderActivity.class.isAssignableFrom(getClass())) {
-            navigationView.setCheckedItem(R.id.navigation_playlists);
-        }
     }
 
     protected void updateDrawerToggle() {

@@ -15,15 +15,21 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaBrowserCompat;
-import android.text.TextUtils;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.databinding.ActivityPlayerBinding;
+import com.example.android.uamp.ui.fragment.FragmentPager;
+import com.example.android.uamp.ui.fragment.PopSongFragment;
+import com.example.android.uamp.ui.fragment.SingerFragment;
 import com.example.android.uamp.utils.LogHelper;
 
 /**
@@ -32,37 +38,44 @@ import com.example.android.uamp.utils.LogHelper;
  * when it is created and connect/disconnect on start/stop. Thus, a MediaBrowser will be always
  * connected while this activity is running.
  */
-public class MusicPlayerActivity extends BaseActivity
-        implements MediaBrowserFragment.MediaFragmentListener {
-
+public class MusicPlayerActivity extends MyBaseActivity implements PopSongFragment.MediaFragmentListener {
+    private ActivityPlayerBinding mBinding;
+    private FragmentPager fragmentPager;
     private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
-    private static final String SAVED_MEDIA_ID="com.example.android.uamp.MEDIA_ID";
+    private static final String SAVED_MEDIA_ID = "com.example.android.uamp.MEDIA_ID";
     private static final String FRAGMENT_TAG = "uamp_list_container";
 
     public static final String EXTRA_START_FULLSCREEN =
             "com.example.android.uamp.EXTRA_START_FULLSCREEN";
 
-    /**
-     * Optionally used with {@link #EXTRA_START_FULLSCREEN} to carry a MediaDescription to
-     * the {@link FullScreenPlayerActivity}, speeding up the screen rendering
-     * while the {@link android.support.v4.media.session.MediaControllerCompat} is connecting.
-     */
     public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
-        "com.example.android.uamp.CURRENT_MEDIA_DESCRIPTION";
+            "com.example.android.uamp.CURRENT_MEDIA_DESCRIPTION";
 
     private Bundle mVoiceSearchParams;
+
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LogHelper.d(TAG, "Activity onCreate");
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_player);
+        setSupportActionBar(mBinding.toolbarContainer.toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setContentView(R.layout.activity_player);
+        fragmentPager = new FragmentPager(getSupportFragmentManager());
 
-        initializeToolbar();
+        fragmentPager.add(new PopSongFragment());
+        fragmentPager.add(new SingerFragment());
+        mBinding.viewPager.setAdapter(fragmentPager);
+        mBinding.toolbarContainer.tab.setupWithViewPager(mBinding.viewPager);
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mBinding.drawerLayout, 0, 0);
+        mBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
         initializeFromParams(savedInstanceState, getIntent());
 
-        // Only check if a full screen player is needed on the first time:
         if (savedInstanceState == null) {
             startFullScreenActivityIfNeeded(getIntent());
         }
@@ -110,27 +123,23 @@ public class MusicPlayerActivity extends BaseActivity
     private void startFullScreenActivityIfNeeded(Intent intent) {
         if (intent != null && intent.getBooleanExtra(EXTRA_START_FULLSCREEN, false)) {
             Intent fullScreenIntent = new Intent(this, FullScreenPlayerActivity.class)
-                .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP |
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .putExtra(EXTRA_CURRENT_MEDIA_DESCRIPTION,
-                    intent.getParcelableExtra(EXTRA_CURRENT_MEDIA_DESCRIPTION));
+                    .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP |
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .putExtra(EXTRA_CURRENT_MEDIA_DESCRIPTION,
+                            intent.getParcelableExtra(EXTRA_CURRENT_MEDIA_DESCRIPTION));
             startActivity(fullScreenIntent);
         }
     }
 
     protected void initializeFromParams(Bundle savedInstanceState, Intent intent) {
         String mediaId = null;
-        // check if we were started from a "Play XYZ" voice search. If so, we save the extras
-        // (which contain the query details) in a parameter, so we can reuse it later, when the
-        // MediaSession is connected.
         if (intent.getAction() != null
-            && intent.getAction().equals(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH)) {
+                && intent.getAction().equals(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH)) {
             mVoiceSearchParams = intent.getExtras();
             LogHelper.d(TAG, "Starting from voice search query=",
-                mVoiceSearchParams.getString(SearchManager.QUERY));
+                    mVoiceSearchParams.getString(SearchManager.QUERY));
         } else {
             if (savedInstanceState != null) {
-                // If there is a saved media ID, use it
                 mediaId = savedInstanceState.getString(SAVED_MEDIA_ID);
             }
         }
@@ -139,48 +148,54 @@ public class MusicPlayerActivity extends BaseActivity
 
     private void navigateToBrowser(String mediaId) {
         LogHelper.d(TAG, "navigateToBrowser, mediaId=" + mediaId);
-        MediaBrowserFragment fragment = getBrowseFragment();
-
-        if (fragment == null || !TextUtils.equals(fragment.getMediaId(), mediaId)) {
-            fragment = new MediaBrowserFragment();
-            fragment.setMediaId(mediaId);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.setCustomAnimations(
-                R.animator.slide_in_from_right, R.animator.slide_out_to_left,
-                R.animator.slide_in_from_left, R.animator.slide_out_to_right);
-            transaction.replace(R.id.container, fragment, FRAGMENT_TAG);
-            // If this is not the top level media (root), we add it to the fragment back stack,
-            // so that actionbar toggle and Back will work appropriately:
-            if (mediaId != null) {
-                transaction.addToBackStack(null);
-            }
-            transaction.commit();
-        }
     }
 
     public String getMediaId() {
-        MediaBrowserFragment fragment = getBrowseFragment();
+        PopSongFragment fragment = getBrowseFragment();
         if (fragment == null) {
             return null;
         }
         return fragment.getMediaId();
     }
 
-    private MediaBrowserFragment getBrowseFragment() {
-        return (MediaBrowserFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+    private PopSongFragment getBrowseFragment() {
+        return (PopSongFragment) fragmentPager.getItem(0);
     }
 
     @Override
     protected void onMediaControllerConnected() {
         if (mVoiceSearchParams != null) {
-            // If there is a bootstrap parameter to start from a search query, we
-            // send it to the media session and set it to null, so it won't play again
-            // when the activity is stopped/started or recreated:
             String query = mVoiceSearchParams.getString(SearchManager.QUERY);
             getSupportMediaController().getTransportControls()
                     .playFromSearch(query, mVoiceSearchParams);
             mVoiceSearchParams = null;
         }
         getBrowseFragment().onConnected();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
+        if (item != null && item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        mBinding.drawerLayout.closeDrawers();
     }
 }

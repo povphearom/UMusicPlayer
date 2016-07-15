@@ -16,9 +16,7 @@
 
 package com.example.android.uamp.model;
 
-import android.media.MediaMetadataRetriever;
 import android.support.v4.media.MediaMetadataCompat;
-import android.util.Log;
 
 import com.example.android.uamp.utils.LogHelper;
 
@@ -90,17 +88,17 @@ public class RemoteJSONSource implements MusicProviderSource {
         String iconUrl = json.getString(JSON_IMAGE);
 //        int trackNumber = json.getInt(JSON_TRACK_NUMBER);
 //        int totalTrackCount = json.getInt(JSON_TOTAL_TRACK_COUNT);
-        try {
-            MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-            metaRetriever.setDataSource(source);
-            String time = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-
-            Log.i("Duration",time);
-
-            duration = Long.valueOf(time);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+//            metaRetriever.setDataSource(source);
+//            String time = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//
+//            Log.i("Duration",time);
+//
+//            duration = Long.valueOf(time);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         LogHelper.d(TAG, "Found music track: ", json);
         // Media is stored relative to JSON file

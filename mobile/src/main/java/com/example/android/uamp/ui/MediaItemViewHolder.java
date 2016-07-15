@@ -15,7 +15,6 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimationDrawable;
@@ -33,11 +32,11 @@ import com.example.android.uamp.R;
 
 public class MediaItemViewHolder {
 
-    static final int STATE_INVALID = -1;
-    static final int STATE_NONE = 0;
-    static final int STATE_PLAYABLE = 1;
-    static final int STATE_PAUSED = 2;
-    static final int STATE_PLAYING = 3;
+    public static final int STATE_INVALID = -1;
+    public static final int STATE_NONE = 0;
+    public static final int STATE_PLAYABLE = 1;
+    public static final int STATE_PAUSED = 2;
+    public static final int STATE_PLAYING = 3;
 
     private static ColorStateList sColorStatePlaying;
     private static ColorStateList sColorStateNotPlaying;
@@ -46,11 +45,11 @@ public class MediaItemViewHolder {
     TextView mTitleView;
     TextView mDescriptionView;
 
-    static View setupView(Activity activity, View convertView, ViewGroup parent,
-                                    MediaDescriptionCompat description, int state) {
+    public static View setupView(Context context, View convertView, ViewGroup parent,
+                                 MediaDescriptionCompat description, int state) {
 
         if (sColorStateNotPlaying == null || sColorStatePlaying == null) {
-            initializeColorStateLists(activity);
+            initializeColorStateLists(context);
         }
 
         MediaItemViewHolder holder;
@@ -58,7 +57,7 @@ public class MediaItemViewHolder {
         Integer cachedState = STATE_INVALID;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(activity)
+            convertView = LayoutInflater.from(context)
                     .inflate(R.layout.media_list_item, parent, false);
             holder = new MediaItemViewHolder();
             holder.mImageView = (ImageView) convertView.findViewById(R.id.play_eq);
@@ -78,7 +77,7 @@ public class MediaItemViewHolder {
         if (cachedState == null || cachedState != state) {
             switch (state) {
                 case STATE_PLAYABLE:
-                    Drawable pauseDrawable = ContextCompat.getDrawable(activity,
+                    Drawable pauseDrawable = ContextCompat.getDrawable(context,
                             R.drawable.ic_play_arrow_black_36dp);
                     DrawableCompat.setTintList(pauseDrawable, sColorStateNotPlaying);
                     holder.mImageView.setImageDrawable(pauseDrawable);
@@ -86,14 +85,14 @@ public class MediaItemViewHolder {
                     break;
                 case STATE_PLAYING:
                     AnimationDrawable animation = (AnimationDrawable)
-                            ContextCompat.getDrawable(activity, R.drawable.ic_equalizer_white_36dp);
+                            ContextCompat.getDrawable(context, R.drawable.ic_equalizer_white_36dp);
                     DrawableCompat.setTintList(animation, sColorStatePlaying);
                     holder.mImageView.setImageDrawable(animation);
                     holder.mImageView.setVisibility(View.VISIBLE);
                     animation.start();
                     break;
                 case STATE_PAUSED:
-                    Drawable playDrawable = ContextCompat.getDrawable(activity,
+                    Drawable playDrawable = ContextCompat.getDrawable(context,
                             R.drawable.ic_equalizer1_white_36dp);
                     DrawableCompat.setTintList(playDrawable, sColorStatePlaying);
                     holder.mImageView.setImageDrawable(playDrawable);
@@ -110,8 +109,8 @@ public class MediaItemViewHolder {
 
     static private void initializeColorStateLists(Context ctx) {
         sColorStateNotPlaying = ColorStateList.valueOf(ctx.getResources().getColor(
-            R.color.media_item_icon_not_playing));
+                R.color.media_item_icon_not_playing));
         sColorStatePlaying = ColorStateList.valueOf(ctx.getResources().getColor(
-            R.color.media_item_icon_playing));
+                R.color.media_item_icon_playing));
     }
 }
