@@ -24,6 +24,7 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.phearom.um.R;
 import com.phearom.um.databinding.ActivityPlayerBinding;
@@ -73,6 +74,13 @@ public class MusicPlayerActivity extends MyBaseActivity implements PopSongFragme
         if (savedInstanceState == null) {
             startFullScreenActivityIfNeeded(getIntent());
         }
+
+        mBinding.fabPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getBrowseFragment().onConnected();
+            }
+        });
     }
 
     @Override
