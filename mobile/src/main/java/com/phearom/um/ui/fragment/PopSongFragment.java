@@ -44,10 +44,8 @@ public class PopSongFragment extends BaseFragment {
 
     private static final String TAG = LogHelper.makeLogTag(MediaBrowserFragment.class);
 
-    private static final String ARG_MEDIA_ID = "media_id";
-
     private BrowseAdapter mBrowserAdapter;
-    private String mMediaId;
+    private String mMediaId = "__ROOT__";
     private MediaFragmentListener mMediaFragmentListener;
     private View mErrorView;
     private TextView mErrorMessage;
@@ -181,7 +179,7 @@ public class PopSongFragment extends BaseFragment {
         if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
             mediaBrowser.unsubscribe(mMediaId);
         }
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
+        MediaControllerCompat controller = getActivity()
                 .getSupportMediaController();
         if (controller != null) {
             controller.unregisterCallback(mMediaControllerCallback);
@@ -196,21 +194,11 @@ public class PopSongFragment extends BaseFragment {
     }
 
     public String getMediaId() {
-        Bundle args = getArguments();
-        if (args != null) {
-            return args.getString(ARG_MEDIA_ID);
-        }
-        return null;
+        return mMediaId;
     }
 
     public void setMediaId(String mediaId) {
-        Bundle args = new Bundle(1);
-        args.putString(PopSongFragment.ARG_MEDIA_ID, mediaId);
-        setArguments(args);
-    }
-
-    public void load(String mediaId) {
-        mMediaId = mediaId;
+        this.mMediaId = mediaId;
     }
 
     public void onConnected() {
@@ -218,17 +206,20 @@ public class PopSongFragment extends BaseFragment {
             return;
         }
         mMediaId = getMediaId();
-        if (mMediaId == null) {
-            mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
-        }
-        updateTitle();
-        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
-        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
-        MediaControllerCompat controller = getActivity()
-                .getSupportMediaController();
-        if (controller != null) {
-            controller.registerCallback(mMediaControllerCallback);
-        }
+
+        mBinding.getRoot().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateTitle();
+                mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
+                mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
+                MediaControllerCompat controller = getActivity()
+                        .getSupportMediaController();
+                if (controller != null) {
+                    controller.registerCallback(mMediaControllerCallback);
+                }
+            }
+        }, 500);
     }
 
     private void checkForUserVisibleErrors(boolean forceError) {

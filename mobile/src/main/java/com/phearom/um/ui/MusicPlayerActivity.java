@@ -32,12 +32,6 @@ import com.phearom.um.ui.fragment.PopSongFragment;
 import com.phearom.um.ui.fragment.SingerFragment;
 import com.phearom.um.utils.LogHelper;
 
-/**
- * Main activity for the music player.
- * This class hold the MediaBrowser and the MediaController instances. It will create a MediaBrowser
- * when it is created and connect/disconnect on start/stop. Thus, a MediaBrowser will be always
- * connected while this activity is running.
- */
 public class MusicPlayerActivity extends MyBaseActivity implements PopSongFragment.MediaFragmentListener {
     private ActivityPlayerBinding mBinding;
     private FragmentPager fragmentPager;
@@ -170,6 +164,7 @@ public class MusicPlayerActivity extends MyBaseActivity implements PopSongFragme
                     .playFromSearch(query, mVoiceSearchParams);
             mVoiceSearchParams = null;
         }
+
         getBrowseFragment().onConnected();
     }
 

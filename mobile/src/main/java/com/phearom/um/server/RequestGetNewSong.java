@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Created by phearom on 7/18/16.
  */
-public class RequestGetNewSong extends ServerRequest {
+public class RequestGetNewSong extends ServerRequest<Iterator<MediaMetadataCompat>> {
 
     private static final String JSON_MUSIC = "result";
     private static final String JSON_TITLE = "music_title";
@@ -47,23 +47,18 @@ public class RequestGetNewSong extends ServerRequest {
     }
 
     @Override
-    public Iterator<MediaMetadataCompat> iterator() {
-        execute(new OnResultCallback<String>() {
-            @Override
-            public void onResult(String result) {
-                try {
-                    JSONObject jsonObject = new JSONObject(result);
-                    JSONArray jsonArray = jsonObject.getJSONArray(JSON_MUSIC);
-                    if (jsonArray.length() > 0) {
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            buildFromJSON(jsonArray.getJSONObject(i));
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+    public Iterator<MediaMetadataCompat> getDataResponse(String data) {
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            JSONArray jsonArray = jsonObject.getJSONArray(JSON_MUSIC);
+            if (jsonArray.length() > 0) {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    getMetadataCompatList().add(buildFromJSON(jsonArray.getJSONObject(i)));
                 }
             }
-        });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return getMetadataCompatList().iterator();
     }
 
@@ -83,7 +78,6 @@ public class RequestGetNewSong extends ServerRequest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         String id = String.valueOf(source.hashCode());
 
         //noinspection ResourceType

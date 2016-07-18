@@ -174,8 +174,6 @@ public class MusicService extends MediaBrowserServiceCompat implements
         LogHelper.d(TAG, "OnGetRoot: clientPackageName=" + clientPackageName,
                 "; clientUid=" + clientUid + " ; rootHints=", rootHints);
         if (!mPackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
-            LogHelper.w(TAG, "OnGetRoot: IGNORING request from untrusted package "
-                    + clientPackageName);
             return null;
         }
 
@@ -188,14 +186,14 @@ public class MusicService extends MediaBrowserServiceCompat implements
         LogHelper.d(TAG, "OnLoadChildren: parentMediaId=", parentMediaId);
         if (mMusicProvider.isInitialized()) {
             // if music library is ready, return immediately
-            result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
+            result.sendResult(mMusicProvider.getChildren(parentMediaId));
         } else {
             // otherwise, only return results when the music library is retrieved
             result.detach();
             mMusicProvider.retrieveMediaAsync(new MusicProvider.Callback() {
                 @Override
                 public void onMusicCatalogReady(boolean success) {
-                    result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
+                    result.sendResult(mMusicProvider.getChildren(parentMediaId));
                 }
             });
         }
