@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "423992469881",
+    "firebase_url": "https://umusic-5c2ba.firebaseio.com",
+    "project_id": "umusic-5c2ba",
+    "storage_bucket": "umusic-5c2ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423992469881:android:d74ec870e665c442",
+        "android_client_info": {
+          "package_name": "com.phearom.um"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "423992469881-gnavfffb748oeddt488v9otaptht3mag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhHiGbD5pNxFdN_Yn4F1vUDiBpm6sxUEU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
