@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.android.uamp">
+    package="com.phearom.um">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -27,21 +27,13 @@
         android:label="@string/app_name"
         android:theme="@style/UAmpAppTheme">
         <meta-data
-            android:name="com.google.android.gms.car.application"
-            android:resource="@xml/automotive_app_desc" />
-        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!--Main activity for music browsing on phone -->
+        <!-- Main activity for music browsing on phone -->
         <activity
             android:name=".ui.MusicPlayerActivity"
             android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
             <!-- Use this intent filter to get voice searches, like "Play The Beatles" -->
             <intent-filter>
@@ -54,23 +46,10 @@
         <!-- Placeholder activity for phone UI -->
         <activity
             android:name=".ui.PlaceholderActivity"
-            android:label="@string/app_name"></activity>
-
+            android:label="@string/app_name" />
         <activity
             android:name=".ui.NowPlayingActivity"
-            android:icon="@drawable/ic_launcher"></activity>
-
-        <meta-data
-            android:name="com.google.android.gms.car.notification.SmallIcon"
-            android:resource="@drawable/ic_notification" />
-
-        <meta-data
-            android:name="com.google.android.gms.car.application.theme"
-            android:resource="@style/CarTheme" />
-
-        <meta-data
-            android:name="com.google.android.wearable.media.theme"
-            android:resource="@style/WearTheme" />
+            android:icon="@drawable/ic_launcher" />
 
         <service
             android:name=".MusicService"
@@ -81,8 +60,6 @@
             </intent-filter>
         </service>
 
-        <service android:name="com.google.android.libraries.cast.companionlibrary.cast.reconnection.ReconnectionService" />
-
         <activity
             android:name=".ui.FullScreenPlayerActivity"
             android:label="@string/app_name"
@@ -90,7 +67,7 @@
             android:parentActivityName=".ui.MusicPlayerActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MusicPlayerActivity" />
+                android:value="com.phearom.um.ui.MusicPlayerActivity" />
         </activity>
 
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
@@ -98,6 +75,14 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".ui.SplashScreenActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
