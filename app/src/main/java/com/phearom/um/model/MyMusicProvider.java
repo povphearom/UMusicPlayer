@@ -183,7 +183,7 @@ public class MyMusicProvider {
         mMusicListByGenre = newMusicListByGenre;
     }
 
-    public synchronized void retrieveMedia(Iterator<MediaMetadataCompat> tracks, Callback callback) {
+    public void retrieveMedia(Iterator<MediaMetadataCompat> tracks, Callback callback) {
         LogHelper.d(TAG, "retrieveMediaAsync called");
         if (mCurrentState == State.INITIALIZED) {
             if (callback != null) {
