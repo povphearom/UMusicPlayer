@@ -37,14 +37,14 @@ public class MusicPlayerActivity extends MyBaseActivity implements PopSongFragme
     private ActivityPlayerBinding mBinding;
     private FragmentPager fragmentPager;
     private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
-    private static final String SAVED_MEDIA_ID = "com.example.android.uamp.MEDIA_ID";
+    private static final String SAVED_MEDIA_ID = "com.phearom.um.MEDIA_ID";
     private static final String FRAGMENT_TAG = "uamp_list_container";
 
     public static final String EXTRA_START_FULLSCREEN =
-            "com.example.android.uamp.EXTRA_START_FULLSCREEN";
+            "com.phearom.um.EXTRA_START_FULLSCREEN";
 
     public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
-            "com.example.android.uamp.CURRENT_MEDIA_DESCRIPTION";
+            "com.phearom.um.CURRENT_MEDIA_DESCRIPTION";
 
     private Bundle mVoiceSearchParams;
 

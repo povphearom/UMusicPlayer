@@ -58,7 +58,8 @@ public class NewSongFragment extends BaseFragment {
                     oldOnline = isOnline;
                     checkForUserVisibleErrors(false);
                     if (isOnline) {
-                        mBrowserAdapter.notifyDataSetChanged();
+                        if (null != mBrowserAdapter)
+                            mBrowserAdapter.notifyDataSetChanged();
                     }
                 }
             }
@@ -77,7 +78,8 @@ public class NewSongFragment extends BaseFragment {
                     }
                     LogHelper.d(TAG, "Received metadata change to media ",
                             metadata.getDescription().getMediaId());
-                    mBrowserAdapter.notifyDataSetChanged();
+                    if (null != mBrowserAdapter)
+                        mBrowserAdapter.notifyDataSetChanged();
                 }
 
                 @Override
@@ -107,7 +109,8 @@ public class NewSongFragment extends BaseFragment {
 
     public void refresh() {
         MyMusicProvider.init().reset();
-        mBrowserAdapter.notifyDataSetChanged();
+        if (null != mBrowserAdapter)
+            mBrowserAdapter.notifyDataSetChanged();
     }
 
     @Nullable

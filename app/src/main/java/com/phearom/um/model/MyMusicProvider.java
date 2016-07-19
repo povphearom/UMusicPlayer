@@ -16,14 +16,10 @@
 
 package com.phearom.um.model;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
-import com.phearom.um.R;
 import com.phearom.um.utils.LogHelper;
 import com.phearom.um.utils.MediaIDHelper;
 
@@ -37,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.phearom.um.utils.MediaIDHelper.MEDIA_ID_MUSICS_BY_GENRE;
-import static com.phearom.um.utils.MediaIDHelper.createMediaID;
 
 /**
  * Simple data provider for music tracks. The actual metadata source is delegated to a
@@ -219,36 +214,36 @@ public class MyMusicProvider {
             return mediaItems;
         }
 
-        for (String key : mMusicListById.keySet()) {
-            mediaItems.add(createMediaItem(mMusicListById.get(key).metadata));
+        for (MutableMediaMetadata metadata : mMusicListById.values()) {
+            mediaItems.add(createMediaItem(metadata.metadata));
         }
 
         return mediaItems;
     }
 
-    private MediaBrowserCompat.MediaItem createBrowsableMediaItemForRoot(Resources resources) {
-        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                .setMediaId(MEDIA_ID_MUSICS_BY_GENRE)
-                .setTitle(resources.getString(R.string.browse_genres))
-                .setSubtitle(resources.getString(R.string.browse_genre_subtitle))
-                .setIconUri(Uri.parse("android.resource://" +
-                        "com.example.android.uamp/drawable/ic_by_genre"))
-                .build();
-        return new MediaBrowserCompat.MediaItem(description,
-                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
-    }
+//    private MediaBrowserCompat.MediaItem createBrowsableMediaItemForRoot(Resources resources) {
+//        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+//                .setMediaId(MEDIA_ID_MUSICS_BY_GENRE)
+//                .setTitle(resources.getString(R.string.browse_genres))
+//                .setSubtitle(resources.getString(R.string.browse_genre_subtitle))
+//                .setIconUri(Uri.parse("android.resource://" +
+//                        "com.example.android.uamp/drawable/ic_by_genre"))
+//                .build();
+//        return new MediaBrowserCompat.MediaItem(description,
+//                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+//    }
 
-    private MediaBrowserCompat.MediaItem createBrowsableMediaItemForGenre(String genre,
-                                                                          Resources resources) {
-        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                .setMediaId(createMediaID(null, MEDIA_ID_MUSICS_BY_GENRE, genre))
-                .setTitle(genre)
-                .setSubtitle(resources.getString(
-                        R.string.browse_musics_by_genre_subtitle, genre))
-                .build();
-        return new MediaBrowserCompat.MediaItem(description,
-                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
-    }
+//    private MediaBrowserCompat.MediaItem createBrowsableMediaItemForGenre(String genre,
+//                                                                          Resources resources) {
+//        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+//                .setMediaId(createMediaID(null, MEDIA_ID_MUSICS_BY_GENRE, genre))
+//                .setTitle(genre)
+//                .setSubtitle(resources.getString(
+//                        R.string.browse_musics_by_genre_subtitle, genre))
+//                .build();
+//        return new MediaBrowserCompat.MediaItem(description,
+//                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+//    }
 
     private MediaBrowserCompat.MediaItem createMediaItem(MediaMetadataCompat metadata) {
         String genre = metadata.getString(MediaMetadataCompat.METADATA_KEY_GENRE);
